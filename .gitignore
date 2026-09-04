@@ -1,0 +1,31 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts.timestamp-*
+*.tsbuildinfo
+
+# sanity studio (the schemas here are a copy; build output never is)
+/sanity/dist/
+/sanity/node_modules/
+.sanity/
+
+# secrets — the scripts read SANITY_TOKEN from the environment, never a file
+.env
+.env.*
+!.env.example
+
+# hosting
+/.vercel
+
+# misc
+*.log
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db

@@ -1,0 +1,134 @@
+"use client";
+
+import { useState } from "react";
+import TagSphere, { key } from "../TagSphere";
+import PillNav from "../PillNav";
+import MaskedText from "./MaskedText";
+
+export type Group = { title: string; items: string[] };
+export type Job = {
+  period: string;
+  place: string;
+  role: string;
+  company: string;
+  body: string;
+};
+
+export type Hero = {
+  name: string;
+  roles: string[];
+  bio: string;
+  portrait?: string;
+  portraitAlt?: string;
+};
+
+export default function AboutView({
+  hero,
+  resume,
+  groups,
+  experience,
+  education,
+}: {
+  hero: Hero;
+  resume?: string;
+  groups: Group[];
+  experience: Job[];
+  education: Job[];
+}) {
+  const [active, setActive] = useState<string | null>(null);
+  // the sphere shows every skill in the panel, deduped
+  const cloud = Array.from(new Set(groups.flatMap((g) => g.items)));
+
+  return (
+    <main className="about">
+      <header className="topbar">
+        <a href="/" className="logo">AB</a>
+        {/* only offered when a PDF is actually uploaded in Sanity */}
+        {resume && (
+          <a className="resume" href={resume} target="_blank" rel="noreferrer">
+            Resume
+          </a>
+        )}
+      </header>
+
+      <section className="intro">
+        <div>
+          <h1>{hero.name}</h1>
+          <p className="role">{hero.roles.join(" - ")}</p>
+          <MaskedText text={hero.bio} />
+        </div>
+        {hero.portrait ? (
+          <img className="portrait" src={hero.portrait} alt={hero.portraitAlt ?? hero.name} />
+        ) : (
+          <div className="portrait" aria-hidden="true" />
+        )}
+      </section>
+
+      <section className="skills">
+        <h2>Skills</h2>
+        <div className="skills-grid">
+          <TagSphere words={cloud} active={active} onHover={setActive} />
+
+          <div className="skill-groups">
+            {groups.map((g) => (
+              <div key={g.title}>
+                <h3>{g.title}</h3>
+                <div className="chips">
+                  {g.items.map((item) => (
+                    <span
+                      key={item}
+                      className="chip"
+                      data-active={key(item) === active}
+                      onPointerEnter={() => setActive(key(item))}
+                      onPointerLeave={() => setActive(null)}
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="experience">
+        <h2>Experience</h2>
+        {experience.map((job) => (
+          <article key={job.period + job.company}>
+            <div>
+              <p className="period">{job.period}</p>
+              <p className="place">{job.place}</p>
+            </div>
+            <div>
+              <p className="job-role">{job.role}</p>
+              <p className="company">{job.company}</p>
+            </div>
+            <p className="job-body">{job.body}</p>
+          </article>
+        ))}
+      </section>
+
+      {education.length > 0 && (
+        <section className="experience">
+          <h2>Education</h2>
+          {education.map((item) => (
+            <article key={item.period + item.company}>
+              <div>
+                <p className="period">{item.period}</p>
+                <p className="place">{item.place}</p>
+              </div>
+              <div>
+                <p className="job-role">{item.role}</p>
+                <p className="company">{item.company}</p>
+              </div>
+              <p className="job-body">{item.body}</p>
+            </article>
+          ))}
+        </section>
+      )}
+
+      <PillNav />
+    </main>
+  );
+}
