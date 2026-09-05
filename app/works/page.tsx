@@ -35,7 +35,29 @@ const LISTS: { discipline: string; subtitle: string }[] = [
   { discipline: "frontend", subtitle: "Web / Development" },
   { discipline: "uiux", subtitle: "UI / UX Design" },
 ];
-const BEHANCE = "https://www.behance.net/amar_balaji";
+// behance 404s on a bare id - the trailing slug can be anything
+const behanceUrl = (id: string) => `https://www.behance.net/gallery/${id}/project`;
+
+/** Behance holds the real name and cover for these projects; Sanity only has
+ *  placeholders. Cached for an hour; any failure falls back to the Sanity doc.
+ *  The <title> is used over og:title - og:title appends the author name, and
+ *  one of the project names contains a dash itself. */
+async function behanceMeta(id: string): Promise<{ title?: string; img?: string }> {
+  try {
+    const r = await fetch(behanceUrl(id), {
+      headers: { "user-agent": "Mozilla/5.0" },
+      next: { revalidate: 3600 },
+    });
+    if (!r.ok) return {};
+    const html = await r.text();
+    return {
+      title: html.match(/<title>([^<]*?)\s*::\s*Behance<\/title>/i)?.[1],
+      img: html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i)?.[1],
+    };
+  } catch {
+    return {};
+  }
+}
 
 export default async function Works() {
   const docs = await sanityFetch<Doc[]>(QUERY);
@@ -54,15 +76,22 @@ export default async function Works() {
     }))
     .filter((g) => g.images.length > 0);
 
-  const lists: Row[][] = LISTS.map(({ discipline, subtitle }) =>
-    docs
-      .filter((d) => d.discipline === discipline)
-      .map((d) => ({
-        title: d.title ?? "Untitled",
-        subtitle,
-        href: d.liveUrl ?? (d.behanceId ? BEHANCE : undefined),
-        img: d.ref ? imageUrl(d.ref, 700) : undefined,
-      }))
+  const lists: Row[][] = await Promise.all(
+    LISTS.map(({ discipline, subtitle }) =>
+      Promise.all(
+        docs
+          .filter((d) => d.discipline === discipline)
+          .map(async (d) => {
+            const meta = d.behanceId ? await behanceMeta(d.behanceId) : {};
+            return {
+              title: meta.title ?? d.title ?? "Untitled",
+              subtitle,
+              href: d.liveUrl ?? (d.behanceId ? behanceUrl(d.behanceId) : undefined),
+              img: d.ref ? imageUrl(d.ref, 700) : meta.img,
+            };
+          })
+      )
+    )
   );
 
   // placeholder: no bim documents in Sanity yet, so borrow the dev projects

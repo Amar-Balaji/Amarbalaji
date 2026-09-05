@@ -17,6 +17,19 @@ export default async function ContactPage() {
   const c = await sanityFetch<Contact>(`*[_type=="contact"][0]`);
   const email = c?.email ?? "amarbalaji.r@gmail.com";
 
+  // shown until the link is added in Sanity, which then wins
+  const socials = c?.socials ?? [];
+  const links = socials.some((s) => s.href.includes("linkedin.com"))
+    ? socials
+    : [
+        ...socials,
+        {
+          _key: "linkedin",
+          label: "LinkedIn",
+          href: "https://www.linkedin.com/in/amar-balaji-203620147",
+        },
+      ];
+
   return (
     <main className="contact">
       <h1>CONTACT</h1>
@@ -42,11 +55,11 @@ export default async function ContactPage() {
             </div>
           )}
 
-          {!!c?.socials?.length && (
+          {!!links.length && (
             <div>
               <p className="c-label muted">Connect</p>
               <div className="chips">
-                {c.socials.map((s) => (
+                {links.map((s) => (
                   <a className="chip" key={s._key} href={s.href} target="_blank" rel="noreferrer">
                     {s.label}
                   </a>
