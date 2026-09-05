@@ -255,6 +255,7 @@ html, body {
   .experience + .experience { margin-top: 80px; }
   .sphere { height: 340px; }
   .tag { font-size: 18px; }
+  .portrait { display: none; }
 }
 
 /* ============ page transition ============ */
@@ -452,7 +453,7 @@ html, body {
   50%      { transform: translateY(14px); opacity: 1; }
 }
 
-.spotlight { cursor: grab; }
+.spotlight { cursor: grab; touch-action: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .disciplines button, .drag-hint { animation: none; }
@@ -584,18 +585,56 @@ html, body {
   html, body, a, button, input, textarea, .sphere, .spotlight { cursor: none; }
 }
 
+/* --- discipline menu toggle (phone/tablet only) --- */
+.disc-toggle { display: none; }
+
 @media (max-width: 900px) {
-  .works-list { padding: 20px 22px 140px; }
+  .works-list { padding: 84px 22px 140px; }
   .project-item { padding: 26px 0; gap: 20px; }
-  /* nav sits above the content instead of floating over it */
-  .disciplines {
-    position: static;
-    transform: none;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 22px;
-    padding: 80px 22px 0;
+
+  .disc-toggle {
+    display: flex;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 30;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 0 10px;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    background: rgba(20, 20, 20, 0.7);
+    backdrop-filter: blur(10px);
+    cursor: pointer;
   }
+  .disc-toggle span {
+    height: 1.5px;
+    background: #fff;
+    transition: transform 0.3s ease, opacity 0.2s ease;
+  }
+  .disc-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .disc-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .disc-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+  /* the list drops from the toggle instead of colliding with the gallery */
+  .disciplines {
+    top: 76px;
+    left: 20px;
+    right: 20px;
+    transform: none;
+    z-index: 29;
+    gap: 4px;
+    padding: 10px 18px;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    background: rgba(20, 20, 20, 0.82);
+    backdrop-filter: blur(14px);
+  }
+  .disciplines[data-open="false"] { display: none; }
+  .disciplines button { padding: 12px 0; animation: none; }
 }
 
 /* ============ contact ============ */
@@ -806,15 +845,17 @@ html, body {
   .about, .contact { padding-left: 30px; padding-right: 30px; }
   .intro { gap: 36px; }
   .skills-grid { gap: 34px; }
-  .works-list { padding: 80px 34px 150px 170px; }
   .w-intro { padding-left: 170px; }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
   .disciplines { left: 34px; }
+  .works-list { padding: 80px 34px 150px 170px; }
 }
 
 /* --- tablet portrait: single column everywhere, nav above content --- */
 @media (max-width: 900px) {
   .w-intro { padding-left: 22px; }
-  .works-list { padding: 20px 22px 150px; }
   .experience article { padding: 22px 0; }
   .sphere { height: 380px; }
   .contact-details { gap: 34px; }

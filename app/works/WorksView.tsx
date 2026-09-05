@@ -11,18 +11,33 @@ const LABELS = ["3d", "BIM", "Code", "UI/UX"];
 
 export default function WorksView({ groups, lists }: { groups: Group[]; lists: Row[][] }) {
   const [active, setActive] = useState(0);
+  const [menu, setMenu] = useState(false); // collapsed into a hamburger below 900px
   const gallery = active === 0;
 
   return (
     <main className="works" data-mode={gallery ? "gallery" : "list"}>
-      <nav className="disciplines">
+      <button
+        className="disc-toggle"
+        aria-label="Disciplines"
+        aria-expanded={menu}
+        onClick={() => setMenu((o) => !o)}
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+
+      <nav className="disciplines" data-open={menu}>
         {LABELS.map((label, i) => (
           <button
             key={label}
             style={{ ["--i" as string]: i }}
             data-active={i === active}
             aria-current={i === active ? "true" : undefined}
-            onClick={() => setActive(i)}
+            onClick={() => {
+              setActive(i);
+              setMenu(false);
+            }}
           >
             <span className="disc-index">{String(i + 1).padStart(2, "0")}</span>
             <span className="disc-mask">
