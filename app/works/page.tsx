@@ -47,6 +47,17 @@ const behanceUrl = (id: string) => `https://www.behance.net/gallery/${id}/projec
  *  placeholders. Cached for an hour; any failure falls back to the Sanity doc.
  *  The <title> is used over og:title - og:title appends the author name, and
  *  one of the project names contains a dash itself. */
+const decode = (s: string) =>
+  s.replace(/&(#\d+|#x[\da-f]+|\w+);/gi, (m, e) =>
+    e[0] === "#"
+      ? String.fromCodePoint(
+          e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : Number(e.slice(1))
+        )
+      : ({amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " "} as Record<string, string>)[
+          e.toLowerCase()
+        ] ?? m
+  );
+
 async function behanceMeta(id: string): Promise<{ title?: string; img?: string }> {
   try {
     const r = await fetch(behanceUrl(id), {
@@ -57,8 +68,9 @@ async function behanceMeta(id: string): Promise<{ title?: string; img?: string }
     });
     if (!r.ok) return {};
     const html = await r.text();
+    const title = html.match(/<title>([^<]*?)\s*::\s*Behance<\/title>/i)?.[1];
     return {
-      title: html.match(/<title>([^<]*?)\s*::\s*Behance<\/title>/i)?.[1],
+      title: title && decode(title),
       img: html.match(/<meta[^>]+property="og:image"[^>]+content="([^"]+)"/i)?.[1],
     };
   } catch {

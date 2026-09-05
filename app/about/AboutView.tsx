@@ -30,7 +30,7 @@ export default function AboutView({
   education,
 }: {
   hero: Hero;
-  resume?: string;
+  resume: string;
   groups: Group[];
   experience: Job[];
   education: Job[];
@@ -43,12 +43,10 @@ export default function AboutView({
     <main className="about">
       <header className="topbar">
         <a href="/" className="logo">AB</a>
-        {/* only offered when a PDF is actually uploaded in Sanity */}
-        {resume && (
-          <a className="resume" href={resume} target="_blank" rel="noreferrer">
-            Resume
-          </a>
-        )}
+        {/* the Sanity upload if there is one, else the bundled cv.pdf */}
+        <a className="resume" href={resume} target="_blank" rel="noreferrer">
+          Resume
+        </a>
       </header>
 
       <section className="intro">

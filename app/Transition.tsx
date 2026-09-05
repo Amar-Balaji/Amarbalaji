@@ -30,7 +30,7 @@ export default function Transition() {
   // cover the screen before letting the router move
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
       const link = (e.target as HTMLElement).closest("a");
       const href = link?.getAttribute("href");
       if (!href || link!.target === "_blank") return;

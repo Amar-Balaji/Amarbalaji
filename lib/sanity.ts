@@ -3,7 +3,7 @@ const DATASET = "production";
 const API = "2024-01-01";
 
 export async function sanityFetch<T>(query: string): Promise<T> {
-  const url = `https://${PROJECT_ID}.apicdn.sanity.io/v${API}/data/query/${DATASET}?query=${encodeURIComponent(query)}`;
+  const url = `https://${PROJECT_ID}.apicdn.sanity.io/v${API}/data/query/${DATASET}?query=${encodeURIComponent(query)}&perspective=published`;
   const res = await fetch(url, { next: { revalidate: 60 } });
   if (!res.ok) throw new Error(`sanity ${res.status}`);
   return (await res.json()).result;

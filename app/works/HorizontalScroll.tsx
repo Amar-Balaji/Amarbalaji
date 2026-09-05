@@ -45,7 +45,9 @@ export default function HorizontalScroll({ children }: { children: React.ReactNo
   }, []);
 
   return (
-    <div className="hscroll" ref={ref}>
+    // tabIndex: the gallery holds no focusable children, so without this the
+    // whole scroller is unreachable by keyboard in Chrome
+    <div className="hscroll" ref={ref} tabIndex={0} role="region" aria-label="Works gallery">
       {children}
     </div>
   );

@@ -36,7 +36,6 @@ export default function ProjectList({ rows }: { rows: Row[] }) {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(raf);
     };
   }, []);
 
