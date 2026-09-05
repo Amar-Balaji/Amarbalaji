@@ -39,13 +39,23 @@ export default function Tunnel({
     let target = 0;
     let current = 0;
     let raf = 0;
+    let running = false;
+
+    // reduced motion: place the layers once, never animate the drift
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // hold the tunnel empty until the preloader clears, then drift the images in
     const introStart = performance.now() + preloadRemaining();
 
+    const wake = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(tick);
+    };
     const used = () => interact.current?.();
     const onWheel = (e: WheelEvent) => {
       target += e.deltaY * SCROLL_SPEED;
+      wake();
       used();
     };
 
@@ -63,6 +73,7 @@ export default function Tunnel({
       if (!dragging) return;
       target += (lastY - e.clientY) * SCROLL_SPEED * 2.5;
       lastY = e.clientY;
+      wake();
       used();
     };
     const onUp = () => {
@@ -80,7 +91,7 @@ export default function Tunnel({
       current += (target - current) * LERP;
 
       // eased drift from far beyond the fog to the resting depth
-      const t = Math.min(1, Math.max(0, (now - introStart) / INTRO_MS));
+      const t = still ? 1 : Math.min(1, Math.max(0, (now - introStart) / INTRO_MS));
       const intro = INTRO_FROM * (1 - t) ** 3;
 
       for (const { element, baseZ } of layers) {
@@ -92,8 +103,16 @@ export default function Tunnel({
         element.style.setProperty("--overlay", String(o));
         element.style.visibility = o >= 0.99 ? "hidden" : "visible";
       }
+      // idle: the intro has landed and the scroll has caught up, so there is
+      // nothing left to repaint until the next input
+      if (t >= 1 && Math.abs(target - current) < 0.5) {
+        current = target;
+        running = false;
+        return;
+      }
       raf = requestAnimationFrame(tick);
     };
+    running = true;
     raf = requestAnimationFrame(tick);
 
     return () => {

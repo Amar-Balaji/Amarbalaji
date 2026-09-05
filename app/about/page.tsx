@@ -3,6 +3,11 @@ import { sanityFetch, imageUrl, fileUrl } from "../../lib/sanity";
 
 export const revalidate = 60;
 
+export const metadata = {
+  title: "About",
+  description: "Bim modeler, 3d visualiser and ui/ux designer based in Bangalore.",
+};
+
 type Data = {
   hero?: { name?: string; roles?: string[]; bio?: string; ref?: string; alt?: string };
   groups?: Group[];

@@ -10,8 +10,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const s = await sanityFetch<{ seoTitle?: string; seoDescription?: string }>(
     `*[_type=="siteSettings"][0]{seoTitle, seoDescription}`
   );
+  const title = s?.seoTitle ?? "Amar Balaji";
   return {
-    title: s?.seoTitle ?? "Amar Balaji",
+    // pages set their own short title; this frames it
+    title: {default: title, template: "%s — Amar Balaji"},
     description: s?.seoDescription ?? "",
   };
 }

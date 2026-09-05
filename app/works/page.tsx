@@ -4,6 +4,11 @@ import { sanityFetch, imageUrl } from "../../lib/sanity";
 
 export const revalidate = 60;
 
+export const metadata = {
+  title: "Works",
+  description: "3D architectural visualisation, BIM coordination, front end and UI/UX projects.",
+};
+
 type Doc = {
   title?: string;
   category?: string;
@@ -46,6 +51,8 @@ async function behanceMeta(id: string): Promise<{ title?: string; img?: string }
   try {
     const r = await fetch(behanceUrl(id), {
       headers: { "user-agent": "Mozilla/5.0" },
+      // behance is not ours; a hang here would stall the page rebuild
+      signal: AbortSignal.timeout(5000),
       next: { revalidate: 3600 },
     });
     if (!r.ok) return {};

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import HorizontalScroll from "./HorizontalScroll";
 import ProjectList, { type Row } from "./ProjectList";
 import PillNav from "../PillNav";
@@ -15,11 +15,29 @@ const LABELS = ["3d", "BIM", "Code", "UI/UX"];
 
 export default function WorksView({ groups, lists }: { groups: Group[]; lists: Row[][] }) {
   const [active, setActive] = useState(0);
-  const [menu, setMenu] = useState(false); // collapsed into a hamburger below 900px
+  const [menu, setMenu] = useState(false); // collapsed into a hamburger below 1100px
+  const menuRef = useRef<HTMLDivElement>(null);
   const gallery = active === 0;
+
+  // on tablet this menu is the only way to change discipline, so it has to be
+  // dismissable the two ways people expect
+  useEffect(() => {
+    if (!menu) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setMenu(false);
+    const onDown = (e: PointerEvent) => {
+      if (!menuRef.current?.contains(e.target as Node)) setMenu(false);
+    };
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("pointerdown", onDown);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("pointerdown", onDown);
+    };
+  }, [menu]);
 
   return (
     <main className="works" data-mode={gallery ? "gallery" : "list"}>
+      <div ref={menuRef}>
       <button
         className="disc-toggle"
         aria-label="Disciplines"
@@ -54,6 +72,7 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
           </button>
         ))}
       </nav>
+      </div>
 
       {gallery ? (
         <HorizontalScroll>

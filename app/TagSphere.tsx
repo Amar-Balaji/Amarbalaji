@@ -137,13 +137,28 @@ export default function TagSphere({
         if (next !== hovered.current) report.current(next);
       }
 
+      // with the idle spin off there is nothing to repaint once it settles
+      if (still && !dragging && Math.abs(vx) < 0.00001 && Math.abs(vy) < 0.00001) {
+        running = false;
+        return;
+      }
       raf = requestAnimationFrame(tick);
     };
+    let running = true;
     let raf = requestAnimationFrame(tick);
+    const wake = () => {
+      if (running) return;
+      running = true;
+      raf = requestAnimationFrame(tick);
+    };
+    el.addEventListener("pointerdown", wake);
+    el.addEventListener("pointermove", wake);
 
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      el.removeEventListener("pointerdown", wake);
+      el.removeEventListener("pointermove", wake);
       el.removeEventListener("pointerdown", onDown);
       el.removeEventListener("pointermove", onMove);
       el.removeEventListener("pointerup", onUp);

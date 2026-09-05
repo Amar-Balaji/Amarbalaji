@@ -12,6 +12,9 @@ export default function Cursor() {
     if (!window.matchMedia("(pointer: fine)").matches) return;
     const el = dot.current!;
     el.dataset.on = "true";
+    // tells the stylesheet the replacement cursor exists, so it is safe to
+    // hide the system one
+    document.documentElement.dataset.cursor = "custom";
 
     let mx = -200, my = -200, x = mx, y = my;
 
@@ -35,6 +38,7 @@ export default function Cursor() {
 
     return () => {
       cancelAnimationFrame(raf);
+      delete document.documentElement.dataset.cursor;
       window.removeEventListener("mousemove", move);
       window.removeEventListener("mouseover", over);
     };

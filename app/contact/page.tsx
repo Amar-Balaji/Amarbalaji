@@ -5,6 +5,11 @@ import { sanityFetch } from "../../lib/sanity";
 
 export const revalidate = 60;
 
+export const metadata = {
+  title: "Contact",
+  description: "Get in touch about visualisation, BIM coordination or design work.",
+};
+
 type Contact = {
   heading?: string;
   email?: string;
