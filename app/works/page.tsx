@@ -25,7 +25,9 @@ const SECTIONS: Record<string, string> = {
   workspace: "Workspace",
   other: "Other",
 };
-const PER_SECTION = 12;
+// the gallery slot is 38vw on desktop, full width below 900px - the browser
+// picks from these by slot width x device pixel ratio
+const WIDTHS = [700, 1000, 1400];
 
 // the three list disciplines, in the order of the left-hand nav after "3d"
 const LISTS: { discipline: string; subtitle: string }[] = [
@@ -44,8 +46,11 @@ export default async function Works() {
       label: SECTIONS[key],
       images: docs
         .filter((d) => d.category === key && d.ref)
-        .slice(0, PER_SECTION)
-        .map((d) => ({ src: imageUrl(d.ref!, 1400), alt: d.alt ?? d.title ?? "" })),
+        .map((d) => ({
+          src: imageUrl(d.ref!, 1400),
+          srcSet: WIDTHS.map((w) => `${imageUrl(d.ref!, w)} ${w}w`).join(", "),
+          alt: d.alt ?? d.title ?? "",
+        })),
     }))
     .filter((g) => g.images.length > 0);
 

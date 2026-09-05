@@ -58,7 +58,16 @@ export default function AboutView({
           <MaskedText text={hero.bio} />
         </div>
         {hero.portrait ? (
-          <img className="portrait" src={hero.portrait} alt={hero.portraitAlt ?? hero.name} />
+          // the portrait is hidden below 900px - display:none still downloads an
+          // <img src>, so the real file hangs off a media source and the fallback
+          // src is an inline pixel that costs no request
+          <picture className="portrait">
+            <source media="(min-width: 901px)" srcSet={hero.portrait} />
+            <img
+              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+              alt={hero.portraitAlt ?? hero.name}
+            />
+          </picture>
         ) : (
           <div className="portrait" aria-hidden="true" />
         )}

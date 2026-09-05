@@ -5,7 +5,11 @@ import HorizontalScroll from "./HorizontalScroll";
 import ProjectList, { type Row } from "./ProjectList";
 import PillNav from "../PillNav";
 
-export type Group = { key: string; label: string; images: { src: string; alt: string }[] };
+export type Group = {
+  key: string;
+  label: string;
+  images: { src: string; srcSet: string; alt: string }[];
+};
 
 const LABELS = ["3d", "BIM", "Code", "UI/UX"];
 
@@ -69,7 +73,14 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
                 </div>
                 <div className="w-gallery">
                   {group.images.map((img) => (
-                    <img key={img.src} src={img.src} alt={img.alt} loading="lazy" />
+                    <img
+                      key={img.src}
+                      src={img.src}
+                      srcSet={img.srcSet}
+                      sizes="(max-width: 900px) 100vw, 38vw"
+                      alt={img.alt}
+                      loading="lazy"
+                    />
                   ))}
                 </div>
               </section>

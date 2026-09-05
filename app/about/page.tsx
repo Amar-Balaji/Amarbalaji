@@ -34,7 +34,7 @@ export default async function About() {
     portraitAlt: data?.hero?.alt,
   };
 
-  const resume = data?.resume ? fileUrl(data.resume) : undefined;
+  const resume = data?.resume ? fileUrl(data.resume) : "/cv.pdf";
 
   return (
     <AboutView
