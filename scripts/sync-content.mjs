@@ -38,6 +38,11 @@ const CONTACT = {
   availability: "Open for freelance opportunities",
   copyright: "Amar Balaji",
   credit: "Designed and developed by Amar Balaji",
+  socials: [
+    { _key: "artstation", label: "ArtStation", href: "https://www.artstation.com/amarbalajii" },
+    { _key: "behance", label: "Behance", href: "https://www.behance.net/amar_balaji" },
+    { _key: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/amar-balaji-203620147" },
+  ],
 };
 
 /* fields no page renders - cleared so the studio stops asking for them */
