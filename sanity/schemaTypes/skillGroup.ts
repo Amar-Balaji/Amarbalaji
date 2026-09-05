@@ -1,19 +1,22 @@
 import {defineField, defineType} from 'sanity'
-import {CogIcon} from '@sanity/icons/Cog'
+import {PackageIcon} from '@sanity/icons/Package'
 
 /**
- * One column of the skills list on the about page. Every item also becomes
- * a word in the rotating tag sphere.
+ * One column of the skills list on the about page - the group title is the
+ * category. Every item also becomes a word in the rotating tag sphere, so
+ * items stay plain strings: the sphere renders the text itself.
  */
 export const skillGroup = defineType({
   name: 'skillGroup',
   title: 'Skill group',
   type: 'document',
-  icon: CogIcon,
+  icon: PackageIcon,
   fields: [
     defineField({
       name: 'title',
+      title: 'Category',
       type: 'string',
+      description: 'e.g. "3D & Motion", "Development", "Design", "Tools".',
       validation: (rule) => rule.required(),
     }),
     defineField({
@@ -21,6 +24,7 @@ export const skillGroup = defineType({
       title: 'Skills',
       type: 'array',
       of: [{type: 'string'}],
+      options: {layout: 'tags'},
       validation: (rule) => rule.min(1),
     }),
     defineField({
@@ -30,9 +34,7 @@ export const skillGroup = defineType({
       validation: (rule) => rule.required(),
     }),
   ],
-  orderings: [
-    {title: 'Sort order', name: 'orderAsc', by: [{field: 'order', direction: 'asc'}]},
-  ],
+  orderings: [{title: 'Sort order', name: 'orderAsc', by: [{field: 'order', direction: 'asc'}]}],
   preview: {
     select: {title: 'title', items: 'items'},
     prepare: ({title, items}) => ({

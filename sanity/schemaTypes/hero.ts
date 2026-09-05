@@ -1,14 +1,16 @@
-import {defineField, defineType} from 'sanity'
-import {HomeIcon} from '@sanity/icons/Home'
+import {defineArrayMember, defineField, defineType} from 'sanity'
+import {UserIcon} from '@sanity/icons/User'
 
 /**
- * Name, portrait, roles and bio for the about page. A singleton.
+ * The about page: who you are, in the order the page reads. The portrait is
+ * desktop-only on the site, but it is still the OG face of the page, so it
+ * stays required. A singleton.
  */
 export const hero = defineType({
   name: 'hero',
-  title: 'Hero',
+  title: 'About',
   type: 'document',
-  icon: HomeIcon,
+  icon: UserIcon,
   fields: [
     defineField({
       name: 'name',
@@ -37,6 +39,7 @@ export const hero = defineType({
       title: 'Role tags',
       type: 'array',
       of: [{type: 'string'}],
+      options: {layout: 'tags'},
       description: 'The line under your name, joined with " - ".',
       validation: (rule) => rule.min(1),
     }),
@@ -47,9 +50,31 @@ export const hero = defineType({
       rows: 5,
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: 'location',
+      type: 'string',
+      description: 'e.g. "Bengaluru, India".',
+    }),
+    defineField({
+      name: 'yearsExperience',
+      title: 'Years of experience',
+      type: 'number',
+      validation: (rule) => rule.min(0).max(60),
+    }),
+    defineField({
+      name: 'currently',
+      title: 'Currently working on',
+      type: 'string',
+    }),
+    defineField({
+      name: 'socials',
+      title: 'Social links',
+      type: 'array',
+      of: [defineArrayMember({type: 'socialLink'})],
+    }),
   ],
   preview: {
     select: {title: 'name', media: 'portrait'},
-    prepare: ({title, media}) => ({title: title || 'Hero', subtitle: 'Hero', media}),
+    prepare: ({title, media}) => ({title: title || 'About', subtitle: 'About', media}),
   },
 })

@@ -3,7 +3,7 @@ import {CaseIcon} from '@sanity/icons/Case'
 
 /**
  * One row of the history section. Jobs and qualifications are the same shape
- * — what it was, when and where, and what came of it — so they are one type
+ * - what it was, when and where, and what came of it - so they are one type
  * split by `kind` rather than two near-identical ones.
  */
 export const experienceEntry = defineType({
@@ -63,14 +63,12 @@ export const experienceEntry = defineType({
       validation: (rule) => rule.required(),
     }),
   ],
-  orderings: [
-    {title: 'Sort order', name: 'orderAsc', by: [{field: 'order', direction: 'asc'}]},
-  ],
+  orderings: [{title: 'Sort order', name: 'orderAsc', by: [{field: 'order', direction: 'asc'}]}],
   preview: {
     select: {title: 'title', subtitle: 'period', kind: 'kind'},
     prepare: ({title, subtitle, kind}) => ({
       title,
-      subtitle: `${kind === 'education' ? 'Education' : 'Experience'} \u00b7 ${subtitle}`,
+      subtitle: `${kind === 'education' ? 'Education' : 'Experience'} · ${subtitle}`,
     }),
   },
 })

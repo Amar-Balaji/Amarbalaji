@@ -4,27 +4,32 @@ import {structureTool} from 'sanity/structure'
 
 import {SINGLETONS, schemaTypes} from './schemaTypes'
 
+/** Sidebar order is page order: what a visitor meets first sits highest. */
 const SINGLETON_TITLES: Record<string, string> = {
-  hero: 'Hero',
-  contact: 'Contact & footer',
+  navbar: 'Navigation',
+  homeHero: 'Home hero',
+  hero: 'About',
+  reel: 'Showreel',
+  contact: 'Contact',
+  footer: 'Footer',
   siteSettings: 'Site settings',
 }
 
 /**
- * The three galleries, as folders under Projects. Same values as the
- * `discipline` field — one list, so a folder can never drift from the option
- * it filters on.
+ * The galleries, as folders under Projects. Same values as the `discipline`
+ * field — one list, so a folder can never drift from the option it filters on.
  */
 const GALLERIES = [
   {value: '3d', title: '3D Visualisation'},
+  {value: 'bim', title: 'BIM'},
   {value: 'uiux', title: 'UI/UX'},
   {value: 'frontend', title: 'Front End'},
 ] as const
 
 /**
  * The folders 3D Visualisation drills into. Same values as the `category`
- * field, for the same reason as above. Front Page is the homepage's plate
- * layout; the other four are the folder tiles on /work.
+ * field, for the same reason as above. Front Page fills the homepage tunnel;
+ * the other four are the sections on the works page.
  */
 const RENDER_FOLDERS = [
   {value: 'frontpage', title: 'Front Page'},
@@ -125,8 +130,9 @@ export default defineConfig({
                     ),
                   ),
               ),
-            S.documentTypeListItem('experienceEntry').title('Experience & education'),
+            S.documentTypeListItem('discipline').title('Disciplines'),
             S.documentTypeListItem('skillGroup').title('Skill groups'),
+            S.documentTypeListItem('experienceEntry').title('Experience & education'),
           ]),
     }),
     visionTool(),
@@ -144,7 +150,7 @@ export default defineConfig({
         schemaType: 'project',
         parameters: [
           {name: 'discipline', type: 'string'},
-          // Only the 3D folders pass this; the other two galleries have none.
+          // Only the 3D folders pass this; the other galleries have none.
           {name: 'category', type: 'string'},
         ],
         value: ({discipline, category}: {discipline: string; category?: string}) =>
