@@ -31,6 +31,8 @@ const SETTINGS = {
     "3D architectural visualisation, BIM coordination and UI/UX design. " +
     "6.5 years of photorealistic renders for residential and commercial " +
     "projects. Bangalore.",
+  // absolute origin for canonical links, sitemap and social cards
+  siteUrl: "https://amarbalaji.vercel.app",
 };
 
 /* ------------------------------------------------------------- contact */
@@ -48,7 +50,6 @@ const CONTACT = {
 /* fields no page renders - cleared so the studio stops asking for them */
 const UNSET = [
   { id: "hero", fields: ["greeting"] },
-  { id: "siteSettings", fields: ["ogImage"] },
   { id: "contact", fields: ["heading"] },
 ];
 
