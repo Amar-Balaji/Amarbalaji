@@ -6,12 +6,8 @@ import {SINGLETONS, schemaTypes} from './schemaTypes'
 
 /** Sidebar order is page order: what a visitor meets first sits highest. */
 const SINGLETON_TITLES: Record<string, string> = {
-  navbar: 'Navigation',
-  homeHero: 'Home hero',
   hero: 'About',
-  reel: 'Showreel',
   contact: 'Contact',
-  footer: 'Footer',
   siteSettings: 'Site settings',
 }
 
@@ -130,7 +126,6 @@ export default defineConfig({
                     ),
                   ),
               ),
-            S.documentTypeListItem('discipline').title('Disciplines'),
             S.documentTypeListItem('skillGroup').title('Skill groups'),
             S.documentTypeListItem('experienceEntry').title('Experience & education'),
           ]),
