@@ -43,8 +43,10 @@ const LISTS: { discipline: string; subtitle: string }[] = [
 // behance 404s on a bare id - the trailing slug can be anything
 const behanceUrl = (id: string) => `https://www.behance.net/gallery/${id}/project`;
 
-/** Behance holds the real name and cover for these projects; Sanity only has
- *  placeholders. Cached for an hour; any failure falls back to the Sanity doc.
+/** Fallback for a UI/UX project that has not been through
+ *  scripts/sync-behance.mjs yet - once it has, the name and cover live in
+ *  Sanity and this never runs. Behance blocks datacenter IPs, so this is only
+ *  reliable from a dev machine. Cached for an hour; failure keeps the doc.
  *  The <title> is used over og:title - og:title appends the author name, and
  *  one of the project names contains a dash itself. */
 const decode = (s: string) =>
@@ -101,9 +103,10 @@ export default async function Works() {
         docs
           .filter((d) => d.discipline === discipline)
           .map(async (d) => {
-            const meta = d.behanceId ? await behanceMeta(d.behanceId) : {};
+            // a synced project has its cover in Sanity - nothing left to scrape
+            const meta = d.behanceId && !d.ref ? await behanceMeta(d.behanceId) : {};
             return {
-              title: meta.title ?? d.title ?? "Untitled",
+              title: d.ref ? d.title! : meta.title ?? d.title ?? "Untitled",
               subtitle,
               href: d.liveUrl ?? (d.behanceId ? behanceUrl(d.behanceId) : undefined),
               img: d.ref ? imageUrl(d.ref, 700) : meta.img,

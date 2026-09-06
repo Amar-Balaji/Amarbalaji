@@ -47,7 +47,9 @@ export const hero = defineType({
       name: 'bio',
       title: 'Short bio',
       type: 'text',
-      rows: 5,
+      rows: 12,
+      description:
+        'Blank lines become paragraph breaks. Runs down the column beside the portrait, so around 150 words fills it.',
       validation: (rule) => rule.required(),
     }),
     defineField({

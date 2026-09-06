@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import TagSphere, { key } from "../TagSphere";
 import PillNav from "../PillNav";
 import MaskedText from "./MaskedText";
@@ -36,8 +36,14 @@ export default function AboutView({
   education: Job[];
 }) {
   const [active, setActive] = useState<string | null>(null);
-  // the sphere shows every skill in the panel, deduped
-  const cloud = Array.from(new Set(groups.flatMap((g) => g.items)));
+  // only a chip hover turns the sphere; hovering a tag on the sphere just highlights
+  const [focus, setFocus] = useState<string | null>(null);
+  // the sphere shows every skill in the panel, deduped. memoised because a new
+  // array on every hover would tear down and restart the sphere's render loop
+  const cloud = useMemo(
+    () => Array.from(new Set(groups.flatMap((g) => g.items))),
+    [groups]
+  );
 
   return (
     <main className="about">
@@ -74,7 +80,7 @@ export default function AboutView({
       <section className="skills">
         <h2>Skills</h2>
         <div className="skills-grid">
-          <TagSphere words={cloud} active={active} onHover={setActive} />
+          <TagSphere words={cloud} active={active} focus={focus} onHover={setActive} />
 
           <div className="skill-groups">
             {groups.map((g) => (
@@ -86,8 +92,14 @@ export default function AboutView({
                       key={item}
                       className="chip"
                       data-active={key(item) === active}
-                      onPointerEnter={() => setActive(key(item))}
-                      onPointerLeave={() => setActive(null)}
+                      onPointerEnter={() => {
+                        setActive(key(item));
+                        setFocus(key(item));
+                      }}
+                      onPointerLeave={() => {
+                        setActive(null);
+                        setFocus(null);
+                      }}
                     >
                       {item}
                     </span>

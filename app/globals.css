@@ -132,7 +132,9 @@ html, body {
 
 /* ============ about page ============ */
 .about, .contact {
-  max-width: 73.75rem;
+  /* 92vw keeps a margin on a laptop; the 96rem cap stops the lines running
+     away on a 4K panel, where the root font has already grown to 26px */
+  max-width: min(92vw, 96rem);
   margin: 0 auto;
   padding: 0 2.5rem 10rem;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -165,12 +167,14 @@ html, body {
 }
 .resume:hover { opacity: 0.75; }
 
-.intro {
+/* the intro and the skills row share one column split, so the bio's right edge
+   lands on the same line as the right edge of the sphere below it */
+.intro, .skills-grid {
   display: grid;
   grid-template-columns: 1.35fr 1fr;
   gap: 3.5rem;
-  padding: 3.75rem 0 7.5rem;
 }
+.intro { padding: 3.75rem 0 7.5rem; }
 .intro h1 {
   font-size: clamp(2.75rem, 6vw, 5.125rem);
   font-weight: 800;
@@ -189,7 +193,7 @@ html, body {
   color: #b9b9b9;
   font-size: 1.0625rem;
   line-height: 1.95;
-  max-width: 60ch;
+  white-space: pre-line; /* blank lines in the Sanity field become paragraphs */
 }
 .portrait {
   display: block;
@@ -211,21 +215,61 @@ html, body {
 }
 
 .skills { padding-bottom: 8.75rem; }
-.skills-grid {
-  display: grid;
-  grid-template-columns: 1fr 0.7fr;
-  gap: 3rem;
-  align-items: center;
-}
+.skills-grid { align-items: center; }
 
 /* --- tag sphere --- */
 .sphere {
   position: relative;
-  height: 26.25rem;
+  height: 34rem;
   cursor: grab;
   touch-action: none;
   user-select: none;
 }
+
+/* the dashed web joining each skill to its nearest neighbours. overflow is
+   visible so a strand crossing the bounding box is not clipped, and the whole
+   layer is transparent to the pointer so tag hit-testing still works */
+.sphere .web {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.sphere .wire {
+  fill: none;
+  stroke: #9a9a9a;
+  stroke-width: 1;
+  stroke-dasharray: 3 7;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+/* a charge running the wire. The travel happens over the first 30% of the
+   cycle and the strand is dark for the rest, so with the phases spread across
+   the web about ten of them are lit at any moment. */
+.sphere .pulse {
+  fill: none;
+  stroke: #ff3b1f;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  /* pathLength=1, so this is 30% of the strand however long it looks on
+     screen. The pair has to sum to 1 or a strand carries more than one charge. */
+  stroke-dasharray: 0.3 0.7;
+  opacity: 0;
+  animation: wire-pulse 8s linear infinite;
+  animation-delay: calc(var(--phase) * -8s);
+}
+
+@keyframes wire-pulse {
+  0%   { stroke-dashoffset: 0; opacity: 0; }
+  4%   { opacity: 0.95; }
+  26%  { opacity: 0.95; }
+  30%  { stroke-dashoffset: 1; opacity: 0; }
+  100% { stroke-dashoffset: 1; opacity: 0; }
+}
+
 .tag {
   position: absolute;
   left: 50%;
@@ -265,18 +309,49 @@ html, body {
 .experience + .experience { margin-top: 7.5rem; }
 
 .experience article {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr 1.6fr;
   gap: 2rem;
-  padding: 1.625rem 0;
+  padding: 2rem 0;
   border-bottom: 1px solid #2a2a2a;
+  transition: border-color 0.35s ease;
 }
 .experience article:first-of-type { border-top: 1px solid #2a2a2a; }
-.period { font-size: 1.3125rem; color: #e4e4e4; }
-.place { font-size: 0.875rem; color: #7a7a7a; margin-top: 0.4375rem; }
-.job-role { color: #ff3b1f; font-size: 1.3125rem; }
-.company { font-size: 1.0625rem; color: #cfcfcf; margin-top: 0.4375rem; }
-.job-body { font-size: 0.875rem; line-height: 1.9; color: #c4c4c4; }
+
+/* the wash bleeds past both edges so the row reads as one band, and wipes in
+   from the left rather than just switching on */
+.experience article::before {
+  content: "";
+  position: absolute;
+  inset: -1px -1.25rem;
+  background: #ff3b1f;
+  opacity: 0.08;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.experience article > * { position: relative; } /* above the wash */
+
+.period { font-size: 1.625rem; color: #e4e4e4; }
+.place { font-size: 1rem; color: #7a7a7a; margin-top: 0.5rem; }
+.job-role { color: #ff3b1f; font-size: 1.625rem; font-weight: 600; letter-spacing: -0.01em; }
+.company { font-size: 1.25rem; color: #cfcfcf; margin-top: 0.5rem; }
+.job-body { font-size: 1.0625rem; line-height: 1.75; color: #c4c4c4; }
+.period, .place, .job-role, .company, .job-body { transition: color 0.35s ease; }
+
+@media (hover: hover) {
+  .experience article:hover { border-bottom-color: #ff3b1f; }
+  .experience article:hover::before { transform: scaleX(1); }
+  .experience article:hover .period,
+  .experience article:hover .company { color: #fff; }
+  .experience article:hover .place { color: #a8a8a8; }
+  .experience article:hover .job-body { color: #e6e6e6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experience article::before { transition: none; }
+}
 
 @media (max-width: 900px) {
   .about { padding: 0 22px 140px; }
@@ -754,6 +829,10 @@ html, body {
 
 .contact-form button {
   margin-top: 0.375rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: #ff3b1f;
   color: #0a0a0a;
   border: 0;
@@ -762,9 +841,31 @@ html, body {
   font-size: 0.9375rem;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.25s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
-.contact-form button:hover { opacity: 0.85; }
+.contact-form button .arrow {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) {
+  .contact-form button:hover {
+    background: #fff;
+    color: #ff3b1f;
+    transform: translateY(-2px);
+    box-shadow: 0 0.625rem 1.625rem rgba(255, 59, 31, 0.3);
+  }
+  /* the arrow leaves in the direction it points */
+  .contact-form button:hover .arrow { transform: translate(0.25rem, -0.25rem); }
+}
+.contact-form button:active { transform: translateY(0); box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-form button,
+  .contact-form button .arrow { transition: background-color 0.3s ease, color 0.3s ease; }
+  .contact-form button:hover { transform: none; }
+  .contact-form button:hover .arrow { transform: none; }
+}
 .form-note { font-size: 0.75rem; color: #8a8a8a; }
 
 @media (max-width: 900px) {
@@ -773,7 +874,8 @@ html, body {
 }
 
 /* ============ about — cursor mask reveal on the bio ============ */
-.masked { position: relative; max-width: 60ch; }
+/* no width cap - the bio fills its column so it ends on the sphere's line */
+.masked { position: relative; }
 /* the layer overhangs the text by BLEED so the circle can run past the edges
    instead of being cut off; the padding puts the copy back in place */
 .masked .mask-layer {
@@ -890,14 +992,13 @@ html, body {
 /* --- tablet landscape: pull the fixed page padding in --- */
 @media (max-width: 1100px) {
   .about, .contact { padding-left: 30px; padding-right: 30px; }
-  .intro { gap: 36px; }
-  .skills-grid { gap: 34px; }
+  .intro, .skills-grid { gap: 36px; }
 }
 
 /* --- tablet portrait: single column everywhere, nav above content --- */
 @media (max-width: 900px) {
   .experience article { padding: 22px 0; }
-  .sphere { height: 380px; }
+  .sphere { height: 440px; }
   .contact-details { gap: 34px; }
 }
 
@@ -910,7 +1011,10 @@ html, body {
   .about, .contact { padding-left: 20px; padding-right: 20px; }
   .about h2, .contact h1 { margin-bottom: 44px; }
   .experience + .experience { margin-top: 60px; }
-  .job-body { font-size: 13px; }
+  .period, .job-role { font-size: 21px; }
+  .company { font-size: 17px; }
+  .place { font-size: 14px; }
+  .job-body { font-size: 15px; }
   .topbar { padding: 20px 0; }
 
   .item { width: 165px; height: 225px; }
@@ -919,7 +1023,7 @@ html, body {
   .item:nth-child(3) { margin-left: -190px; }
   .item:nth-child(4) { margin-left: 190px; }
 
-  .sphere { height: 320px; }
+  .sphere { height: 350px; }
   .tag { font-size: 16px; }
   .chip { padding: 8px 13px; font-size: 13px; }
   .skill-groups h3 { font-size: 23px; }
@@ -938,4 +1042,8 @@ html, body {
 @media (pointer: coarse) {
   .masked .mask-layer { display: none; }
   .sphere { cursor: default; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sphere .pulse { animation: none; opacity: 0; }
 }

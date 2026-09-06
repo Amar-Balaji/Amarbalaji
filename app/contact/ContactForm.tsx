@@ -39,7 +39,9 @@ export default function ContactForm({ to }: { to: string }) {
         <textarea name="message" rows={6} required placeholder="Tell me about your vision..." />
       </label>
 
-      <button type="submit">Send Message ↗</button>
+      <button type="submit">
+        Send Message <span className="arrow" aria-hidden="true">↗</span>
+      </button>
       {sent && <p className="form-note">Opening your mail app — if nothing happens, write to {to}.</p>}
     </form>
   );

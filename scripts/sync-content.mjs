@@ -13,6 +13,9 @@ const DATASET = "production";
 const API = "2024-01-01";
 
 /* ---------------------------------------------------------------- hero */
+// long enough to fill the column beside the portrait - the about page bottom
+// aligns the last line with the bottom of the photo. Blank lines survive as
+// paragraph breaks (.bio is white-space: pre-line).
 const HERO = {
   roles: ["Bim Modeler", "3d Visualiser", "Ui/Ux Designer"],
   bio:
@@ -20,7 +23,17 @@ const HERO = {
     "bringing architectural visions to life. Proficient in creating realistic and " +
     "captivating visualizations, adept at collaborating with design teams to exceed " +
     "client expectations. Skilled in the latest software tools and dedicated to " +
-    "continuous growth in the field.",
+    "continuous growth in the field.\n\n" +
+    "Work spans photorealistic interiors and exteriors for residential and " +
+    "commercial projects, carried from early concept massing through to " +
+    "marketing-ready stills and animation. Alongside visualisation, coordinates " +
+    "BIM models in Revit and Dynamo, keeping documentation accurate and consistent " +
+    "from design intent through to construction.\n\n" +
+    "The same attention to composition, hierarchy and detail carries into UI/UX " +
+    "work, designing interfaces and building the front ends that present them. " +
+    "Comfortable across 3ds Max, V-Ray, Corona, Unreal Engine, Lumion and SketchUp, " +
+    "with a growing practice in AI-assisted tooling. Based in Bangalore and open to " +
+    "freelance work.",
 };
 
 /* ------------------------------------------------------------ settings */
@@ -40,10 +53,12 @@ const CONTACT = {
   availability: "Open for freelance opportunities",
   copyright: "Amar Balaji",
   credit: "Designed and developed by Amar Balaji",
+  // _type is required on array members - without it the patch strips it off the
+  // stored entries and the studio can no longer tell what they are
   socials: [
-    { _key: "artstation", label: "ArtStation", href: "https://www.artstation.com/amarbalajii" },
-    { _key: "behance", label: "Behance", href: "https://www.behance.net/amar_balaji" },
-    { _key: "linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/amar-balaji-203620147" },
+    { _key: "artstation", _type: "socialLink", href: "https://www.artstation.com/amarbalajii", label: "ArtStation" },
+    { _key: "behance", _type: "socialLink", href: "https://www.behance.net/amar_balaji", label: "Behance" },
+    { _key: "linkedin", _type: "socialLink", href: "https://www.linkedin.com/in/amar-balaji-203620147", label: "LinkedIn" },
   ],
 };
 
