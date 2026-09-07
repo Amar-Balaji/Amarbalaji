@@ -8,15 +8,18 @@ import PillNav from "../PillNav";
 export type Group = {
   key: string;
   label: string;
-  images: { src: string; srcSet: string; alt: string }[];
+  images: { src: string; srcSet: string; alt: string; ratio: string }[];
 };
 
 const LABELS = ["3d", "BIM", "Code", "UI/UX"];
+const FADE = 700; // must outlast the staggered item-out in globals.css
 
 export default function WorksView({ groups, lists }: { groups: Group[]; lists: Row[][] }) {
   const [active, setActive] = useState(0);
+  const [out, setOut] = useState(false); // old discipline fading away
   const [menu, setMenu] = useState(false); // collapsed into a hamburger below 1100px
   const menuRef = useRef<HTMLDivElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout>>();
   const gallery = active === 0;
 
   // on tablet this menu is the only way to change discipline, so it has to be
@@ -34,6 +37,27 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
       window.removeEventListener("pointerdown", onDown);
     };
   }, [menu]);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  // fade the current discipline out first, then swap - the incoming items
+  // stagger themselves in via the remount (key={active})
+  const go = (i: number) => {
+    setMenu(false);
+    if (i === active) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setActive(i);
+      return;
+    }
+    setOut(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => {
+      setActive(i);
+      setOut(false);
+    }, FADE);
+  };
+
+  let n = 0; // running index across every gallery image, drives the stagger
 
   return (
     <main className="works" data-mode={gallery ? "gallery" : "list"}>
@@ -56,10 +80,7 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
             style={{ ["--i" as string]: i }}
             data-active={i === active}
             aria-current={i === active ? "true" : undefined}
-            onClick={() => {
-              setActive(i);
-              setMenu(false);
-            }}
+            onClick={() => go(i)}
           >
             <span className="disc-index">{String(i + 1).padStart(2, "0")}</span>
             <span className="disc-mask">
@@ -74,6 +95,7 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
       </nav>
       </div>
 
+      <div className="works-body" key={active} data-out={out}>
       {gallery ? (
         <HorizontalScroll>
           <div className="w-frame">
@@ -96,9 +118,17 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
                       key={img.src}
                       src={img.src}
                       srcSet={img.srcSet}
-                      sizes="(max-width: 900px) 100vw, 38vw"
+                      sizes="(max-width: 900px) 100vw, 45vw"
                       alt={img.alt}
                       loading="lazy"
+                      // width follows the height, so the box has to know the
+                      // shape before the file lands or the scroller jumps
+                      style={{
+                        aspectRatio: img.ratio,
+                        // the stagger is capped so images far down the
+                        // scroller are not still waiting to appear
+                        ["--n" as string]: Math.min(n++, 10),
+                      }}
                     />
                   ))}
                 </div>
@@ -112,6 +142,7 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
           <ProjectList rows={lists[active - 1]} />
         </div>
       )}
+      </div>
 
       <PillNav />
     </main>

@@ -30,8 +30,8 @@ const SECTIONS: Record<string, string> = {
   workspace: "Workspace",
   other: "Other",
 };
-// the gallery slot is 38vw on desktop, full width below 900px - the browser
-// picks from these by slot width x device pixel ratio
+// the gallery slot is height-driven on desktop, full width below 900px - the
+// browser picks from these by slot width x device pixel ratio
 const WIDTHS = [700, 1000, 1400];
 
 // the three list disciplines, in the order of the left-hand nav after "3d"
@@ -93,6 +93,9 @@ export default async function Works() {
           src: imageUrl(d.ref!, 1400),
           srcSet: WIDTHS.map((w) => `${imageUrl(d.ref!, w)} ${w}w`).join(", "),
           alt: d.alt ?? d.title ?? "",
+          // image-<id>-<w>x<h>-<ext>: the shape is in the ref, so the gallery
+          // can size the box before the file downloads
+          ratio: d.ref!.split("-")[2].replace("x", " / "),
         })),
     }))
     .filter((g) => g.images.length > 0);

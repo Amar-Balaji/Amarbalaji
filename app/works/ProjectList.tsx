@@ -52,6 +52,7 @@ export default function ProjectList({ rows }: { rows: Row[] }) {
             <Tag
               className="project-item"
               key={row.title + i}
+              style={{ ["--n" as string]: Math.min(i, 10) }}
               {...(row.href ? { href: row.href, target: "_blank", rel: "noreferrer" } : {})}
               onMouseEnter={() => setPreview(row)}
               onMouseLeave={() => setPreview(null)}

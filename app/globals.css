@@ -456,16 +456,50 @@ html, body {
 .w-tab-label h3 { font-size: 0.9375rem; color: #ff3b1f; font-weight: 600; }
 
 .w-gallery { display: flex; height: 100vh; height: 100dvh; }
+/* height-driven: the width follows each image's own aspect-ratio, so nothing
+   is ever cropped */
 .w-gallery img {
   height: 82vh;
-  width: 38vw;
+  width: auto;
+  max-width: none;
   align-self: center;
-  object-fit: cover;
+  object-fit: contain;
   flex-shrink: 0;
   background: #111;
 }
 
 .pill-nav a[data-active="true"] { color: #ff3b1f; }
+
+/* --- discipline swap: the old set drops away item by item, then the new one
+   arrives item by item --- */
+.works[data-mode="gallery"] .works-body { height: 100%; }
+.works-body[data-out="true"] { pointer-events: none; }
+
+@keyframes item-in {
+  from { opacity: 0; transform: translateY(2.25rem); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes item-out {
+  from { opacity: 1; transform: none; }
+  to   { opacity: 0; transform: translateY(2.25rem); }
+}
+.works-body :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty) {
+  animation: item-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(0.12s + var(--n, 0) * 0.09s);
+}
+/* only the first handful are ever on screen, so the exit stagger caps early -
+   FADE in WorksView.tsx has to outlast this */
+.works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty) {
+  animation: item-out 0.4s cubic-bezier(0.4, 0, 1, 1) both;
+  animation-delay: calc(min(var(--n, 0), 6) * 0.05s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .works-body :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty),
+  .works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty) {
+    animation: none;
+  }
+}
 
 @media (max-width: 900px) {
   .works, .hscroll { height: auto; overflow: visible; }
@@ -483,7 +517,7 @@ html, body {
     padding: 0 22px;
   }
   .w-tab-label { writing-mode: horizontal-tb; transform: none; }
-  .w-gallery img { width: 100%; height: 60vh; }
+  .w-gallery img { width: 100%; height: auto; }
 }
 
 /* ============ hero — discipline nav & drag hint ============ */
@@ -1028,7 +1062,6 @@ html, body {
   .chip { padding: 8px 13px; font-size: 13px; }
   .skill-groups h3 { font-size: 23px; }
 
-  .w-gallery img { height: 46vh; }
   .w-intro { height: 38vh; }
   .p-info h2 { font-size: 34px; }
   .p-arrow { font-size: 22px; }
