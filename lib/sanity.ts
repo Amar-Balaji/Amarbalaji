@@ -23,6 +23,10 @@ export function fileUrl(ref: string) {
 
 export type Shot = { ref: string; alt?: string; title?: string; category?: string; discipline?: string };
 
+/** `category` is a reference to a renderFolder; coalesce keeps any render
+ *  still carrying the old plain-string category working until it is migrated. */
+export const CATEGORY_KEY = `"category": coalesce(category->slug.current, category)`;
+
 export const SHOTS_QUERY =
   `*[_type=="project" && defined(image.asset._ref)]|order(order asc)` +
-  `{title, category, discipline, "ref": image.asset._ref, "alt": image.alt}`;
+  `{title, ${CATEGORY_KEY}, discipline, "ref": image.asset._ref, "alt": image.alt}`;

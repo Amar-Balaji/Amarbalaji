@@ -53,22 +53,11 @@ export const project = defineType({
     defineField({
       name: 'category',
       title: 'Folder',
-      type: 'string',
+      type: 'reference',
       group: 'card',
+      to: [{type: 'renderFolder'}],
       description:
-        'Front Page renders fill the homepage tunnel; the rest are the sections on the works page.',
-      options: {
-        list: [
-          {title: 'Front Page', value: 'frontpage'},
-          {title: 'Workspace Renders', value: 'workspace'},
-          {title: 'Residential Renders', value: 'residential'},
-          {title: 'Commercial Space Renders', value: 'commercial'},
-          {title: 'Other Renders', value: 'other'},
-        ],
-        layout: 'radio',
-      },
-      // Untagged renders land in Other rather than vanishing from every folder.
-      initialValue: 'other',
+        'Which section of the works page this render sits in. Add folders under Projects → 3D Visualisation.',
       hidden: ({parent}) => parent?.discipline !== '3d',
     }),
     defineField({
@@ -124,6 +113,15 @@ export const project = defineType({
       type: 'url',
       group: 'card',
       hidden: ({parent}) => parent?.discipline !== 'frontend',
+    }),
+    defineField({
+      name: 'pdf',
+      title: 'PDF',
+      type: 'file',
+      group: 'card',
+      options: {accept: 'application/pdf'},
+      description: 'Opens in a lightbox on the works page instead of following a link.',
+      hidden: ({parent}) => parent?.discipline !== 'bim',
     }),
     defineField({
       name: 'featured',

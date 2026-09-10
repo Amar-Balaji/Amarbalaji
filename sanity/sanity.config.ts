@@ -22,18 +22,8 @@ const GALLERIES = [
   {value: 'frontend', title: 'Front End'},
 ] as const
 
-/**
- * The folders 3D Visualisation drills into. Same values as the `category`
- * field, for the same reason as above. Front Page fills the homepage tunnel;
- * the other four are the sections on the works page.
- */
-const RENDER_FOLDERS = [
-  {value: 'frontpage', title: 'Front Page'},
-  {value: 'workspace', title: 'Workspace Renders'},
-  {value: 'residential', title: 'Residential Renders'},
-  {value: 'commercial', title: 'Commercial Space Renders'},
-  {value: 'other', title: 'Other Renders'},
-] as const
+/** The Studio and the render lists agree on one API version. */
+const API_VERSION = '2026-08-27'
 
 export default defineConfig({
   name: 'default',
@@ -44,7 +34,7 @@ export default defineConfig({
 
   plugins: [
     structureTool({
-      structure: (S) =>
+      structure: (S, context) =>
         S.list()
           .title('Content')
           .items([
@@ -71,43 +61,60 @@ export default defineConfig({
                         .child(
                           // 3D is the only gallery with folders, so it opens
                           // into a list of them rather than straight into
-                          // every render it holds.
+                          // every render it holds. The folders are documents,
+                          // so this list is read fresh each time it opens —
+                          // add one under "Folders" and it shows up here (and
+                          // on the works page) with no code change.
                           value === '3d'
-                            ? S.list()
-                                .title(title)
-                                .items(
-                                  RENDER_FOLDERS.map((folder) =>
-                                    S.listItem()
-                                      .title(folder.title)
-                                      .id(folder.value)
-                                      .child(
-                                        S.documentList()
-                                          .title(folder.title)
-                                          .apiVersion('2026-08-27')
-                                          .filter(
-                                            '_type == "project" && discipline == "3d" && coalesce(category, "other") == $category',
-                                          )
-                                          .params({category: folder.value})
-                                          // Renders sort by image filename on
-                                          // the site; the asset name is not
-                                          // orderable here, so the title —
-                                          // which is named to match — stands
-                                          // in for it.
-                                          .defaultOrdering([
-                                            {field: 'title', direction: 'asc'},
-                                          ])
-                                          .initialValueTemplates([
-                                            S.initialValueTemplateItem('project-by-gallery', {
-                                              discipline: '3d',
-                                              category: folder.value,
-                                            }),
-                                          ]),
-                                      ),
-                                  ),
-                                )
+                            ? async () => {
+                                const folders = await context
+                                  .getClient({apiVersion: API_VERSION})
+                                  .fetch<{_id: string; title: string}[]>(
+                                    '*[_type == "renderFolder"]|order(order asc){_id, title}',
+                                  )
+                                return S.list()
+                                  .title(title)
+                                  .items([
+                                    ...folders.map((folder) =>
+                                      S.listItem()
+                                        .title(folder.title)
+                                        .id(folder._id)
+                                        .child(
+                                          S.documentList()
+                                            .title(folder.title)
+                                            .apiVersion(API_VERSION)
+                                            .filter(
+                                              '_type == "project" && discipline == "3d" && category._ref == $folder',
+                                            )
+                                            .params({folder: folder._id})
+                                            // Renders sort by image filename on
+                                            // the site; the asset name is not
+                                            // orderable here, so the title —
+                                            // which is named to match — stands
+                                            // in for it.
+                                            .defaultOrdering([
+                                              {field: 'title', direction: 'asc'},
+                                            ])
+                                            .initialValueTemplates([
+                                              S.initialValueTemplateItem('project-by-gallery', {
+                                                discipline: '3d',
+                                                category: folder._id,
+                                              }),
+                                            ]),
+                                        ),
+                                    ),
+                                    // Creating and renaming folders sits below
+                                    // the folders themselves, so the list reads
+                                    // as content first and tooling last.
+                                    S.divider(),
+                                    S.documentTypeListItem('renderFolder')
+                                      .title('Manage folders')
+                                      .id('folders'),
+                                  ])
+                              }
                             : S.documentList()
                                 .title(title)
-                                .apiVersion('2026-08-27')
+                                .apiVersion(API_VERSION)
                                 .filter('_type == "project" && discipline == $discipline')
                                 .params({discipline: value})
                                 // The order the galleries render in, so the
@@ -145,11 +152,14 @@ export default defineConfig({
         schemaType: 'project',
         parameters: [
           {name: 'discipline', type: 'string'},
-          // Only the 3D folders pass this; the other galleries have none.
+          // The id of a renderFolder. Only the 3D folders pass this; the
+          // other galleries have none.
           {name: 'category', type: 'string'},
         ],
         value: ({discipline, category}: {discipline: string; category?: string}) =>
-          category ? {discipline, category} : {discipline},
+          category
+            ? {discipline, category: {_type: 'reference', _ref: category}}
+            : {discipline},
       },
     ],
   },

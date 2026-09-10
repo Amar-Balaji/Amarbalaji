@@ -2,6 +2,7 @@ import {contact} from './contact'
 import {experienceEntry} from './experienceEntry'
 import {hero} from './hero'
 import {project} from './project'
+import {renderFolder} from './renderFolder'
 import {siteSettings} from './siteSettings'
 import {skillGroup} from './skillGroup'
 import {socialLink} from './socialLink'
@@ -10,6 +11,7 @@ export const schemaTypes = [
   // sections, in the order the site reads
   hero,
   project,
+  renderFolder,
   skillGroup,
   experienceEntry,
   contact,

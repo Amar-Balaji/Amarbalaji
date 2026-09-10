@@ -1,6 +1,6 @@
 import WorksView, { type Group } from "./WorksView";
 import { type Row } from "./ProjectList";
-import { sanityFetch, imageUrl } from "../../lib/sanity";
+import { sanityFetch, imageUrl, fileUrl, CATEGORY_KEY } from "../../lib/sanity";
 
 export const revalidate = 60;
 
@@ -17,19 +17,27 @@ type Doc = {
   alt?: string;
   liveUrl?: string;
   behanceId?: string;
+  pdf?: string;
 };
 
+type Folder = { key?: string; label?: string };
+
+// One round trip: the renders, and the folders that group them. Folder order
+// is set in the Studio, so adding a section there adds it here.
 const QUERY =
-  `*[_type=="project"]|order(order asc)` +
-  `{title, category, discipline, liveUrl, behanceId, "ref": image.asset._ref, "alt": image.alt}`;
+  `{"docs": *[_type=="project"]|order(order asc)` +
+  `{title, ${CATEGORY_KEY}, discipline, liveUrl, behanceId, "pdf": pdf.asset._ref, "ref": image.asset._ref, "alt": image.alt},` +
+  `"folders": *[_type=="renderFolder"]|order(order asc){"key": slug.current, "label": title}}`;
 
-const SECTIONS: Record<string, string> = {
-  frontpage: "Selected",
-  residential: "Residential",
-  commercial: "Commercial",
-  workspace: "Workspace",
-  other: "Other",
-};
+// ponytail: the pre-folder sections, used only while no renderFolder document
+// exists. Delete once scripts/migrate-folders.mjs has run.
+const SECTIONS: Folder[] = [
+  { key: "frontpage", label: "Selected" },
+  { key: "residential", label: "Residential" },
+  { key: "commercial", label: "Commercial" },
+  { key: "workspace", label: "Workspace" },
+  { key: "other", label: "Other" },
+];
 // the gallery slot is height-driven on desktop, full width below 900px - the
 // browser picks from these by slot width x device pixel ratio
 const WIDTHS = [700, 1000, 1400];
@@ -81,12 +89,13 @@ async function behanceMeta(id: string): Promise<{ title?: string; img?: string }
 }
 
 export default async function Works() {
-  const docs = await sanityFetch<Doc[]>(QUERY);
+  const { docs, folders } = await sanityFetch<{ docs: Doc[]; folders: Folder[] }>(QUERY);
 
-  const groups: Group[] = Object.keys(SECTIONS)
-    .map((key) => ({
+  const groups: Group[] = (folders.length ? folders : SECTIONS)
+    .filter((f): f is { key: string; label: string } => !!f.key && !!f.label)
+    .map(({ key, label }) => ({
       key,
-      label: SECTIONS[key],
+      label,
       images: docs
         .filter((d) => d.category === key && d.ref)
         .map((d) => ({
@@ -113,16 +122,12 @@ export default async function Works() {
               subtitle,
               href: d.liveUrl ?? (d.behanceId ? behanceUrl(d.behanceId) : undefined),
               img: d.ref ? imageUrl(d.ref, 700) : meta.img,
+              pdf: d.pdf ? fileUrl(d.pdf) : undefined,
             };
           })
       )
     )
   );
-
-  // placeholder: no bim documents in Sanity yet, so borrow the dev projects
-  if (lists[0].length === 0) {
-    lists[0] = lists[1].map((r) => ({ ...r, subtitle: "BIM / Coordination — placeholder" }));
-  }
 
   return <WorksView groups={groups} lists={lists} />;
 }

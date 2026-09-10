@@ -668,6 +668,76 @@ html, body {
 
 .empty { padding: 2.5rem 1.5rem; color: #8f8f8f; letter-spacing: 1px; }
 
+/* a row that opens a pdf is a button, not a link - strip the chrome so it
+   sits in the list exactly like its neighbours */
+button.project-item {
+  width: 100%;
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* pdf lightbox - the browser renders the document, we only frame it */
+.pdf-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 8, 8, 0.94);
+  animation: pdf-in 0.3s ease;
+}
+@keyframes pdf-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .pdf-lightbox { animation: none; } }
+
+.pdf-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.pdf-bar strong {
+  flex-grow: 1;
+  font-size: 0.9375rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.pdf-bar a {
+  font-size: 0.75rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+}
+.pdf-bar a:hover { color: #ff3b1f; }
+.pdf-bar button {
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+.pdf-bar button:hover { color: #ff3b1f; }
+
+.pdf-lightbox iframe {
+  flex-grow: 1;
+  width: 100%;
+  border: 0;
+  background: #1a1a1a;
+}
+
+@media (max-width: 700px) {
+  .pdf-bar { padding: 0.875rem 1rem; gap: 0.875rem; }
+  .pdf-bar strong { font-size: 0.75rem; }
+  .pdf-bar a { display: none; }
+}
+
 /* cursor-following image preview */
 .hover-reveal {
   position: fixed;
