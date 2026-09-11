@@ -46,6 +46,13 @@ export const siteSettings = defineType({
       description: 'Optional. Leave empty to load no tag manager at all.',
     }),
     defineField({
+      name: 'moreRendersUrl',
+      title: 'More renders (Drive link)',
+      type: 'url',
+      description:
+        'Optional. Shown as a "View more projects" panel at the end of the 3d gallery. Leave empty to hide it.',
+    }),
+    defineField({
       name: 'resume',
       title: 'Resume (PDF)',
       type: 'file',

@@ -27,7 +27,8 @@ type Folder = { key?: string; label?: string };
 const QUERY =
   `{"docs": *[_type=="project"]|order(order asc)` +
   `{title, ${CATEGORY_KEY}, discipline, liveUrl, behanceId, "pdf": pdf.asset._ref, "ref": image.asset._ref, "alt": image.alt},` +
-  `"folders": *[_type=="renderFolder"]|order(order asc){"key": slug.current, "label": title}}`;
+  `"folders": *[_type=="renderFolder"]|order(order asc){"key": slug.current, "label": title},` +
+  `"more": *[_type=="siteSettings"][0].moreRendersUrl}`;
 
 // ponytail: the pre-folder sections, used only while no renderFolder document
 // exists. Delete once scripts/migrate-folders.mjs has run.
@@ -89,7 +90,11 @@ async function behanceMeta(id: string): Promise<{ title?: string; img?: string }
 }
 
 export default async function Works() {
-  const { docs, folders } = await sanityFetch<{ docs: Doc[]; folders: Folder[] }>(QUERY);
+  const { docs, folders, more } = await sanityFetch<{
+    docs: Doc[];
+    folders: Folder[];
+    more?: string;
+  }>(QUERY);
 
   const groups: Group[] = (folders.length ? folders : SECTIONS)
     .filter((f): f is { key: string; label: string } => !!f.key && !!f.label)
@@ -129,5 +134,5 @@ export default async function Works() {
     )
   );
 
-  return <WorksView groups={groups} lists={lists} />;
+  return <WorksView groups={groups} lists={lists} more={more} />;
 }

@@ -468,6 +468,27 @@ html, body {
   background: #111;
 }
 
+/* closing panel of the 3d gallery: the drive folder with the rest of the work */
+.w-outro {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 10vw 0 7vw;
+  border-left: 1px solid #262626;
+}
+.w-outro a {
+  font-size: clamp(2.25rem, 5vw, 5rem);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+.w-outro a > span { display: block; }
+.w-outro a:hover { color: #ff3b1f; }
+.w-outro-arrow { display: inline-block; transition: transform 0.3s ease; }
+.w-outro a:hover .w-outro-arrow { transform: translate(0.25rem, -0.25rem); }
+
 .pill-nav a[data-active="true"] { color: #ff3b1f; }
 
 /* --- discipline swap: the old set drops away item by item, then the new one
@@ -483,20 +504,20 @@ html, body {
   from { opacity: 1; transform: none; }
   to   { opacity: 0; transform: translateY(2.25rem); }
 }
-.works-body :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty) {
+.works-body :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty) {
   animation: item-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(0.12s + var(--n, 0) * 0.09s);
 }
 /* only the first handful are ever on screen, so the exit stagger caps early -
    FADE in WorksView.tsx has to outlast this */
-.works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty) {
+.works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty) {
   animation: item-out 0.4s cubic-bezier(0.4, 0, 1, 1) both;
   animation-delay: calc(min(var(--n, 0), 6) * 0.05s);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .works-body :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty),
-  .works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .works-title, .project-item, .empty) {
+  .works-body :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty),
+  .works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty) {
     animation: none;
   }
 }
@@ -518,6 +539,11 @@ html, body {
   }
   .w-tab-label { writing-mode: horizontal-tb; transform: none; }
   .w-gallery img { width: 100%; height: auto; }
+  .w-outro {
+    padding: 4.5rem 22px;
+    border-left: 0;
+    border-top: 1px solid #262626;
+  }
 }
 
 /* ============ hero — discipline nav & drag hint ============ */

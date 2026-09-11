@@ -14,7 +14,15 @@ export type Group = {
 const LABELS = ["3d", "BIM", "Code", "UI/UX"];
 const FADE = 700; // must outlast the staggered item-out in globals.css
 
-export default function WorksView({ groups, lists }: { groups: Group[]; lists: Row[][] }) {
+export default function WorksView({
+  groups,
+  lists,
+  more,
+}: {
+  groups: Group[];
+  lists: Row[][];
+  more?: string;
+}) {
   const [active, setActive] = useState(0);
   const [out, setOut] = useState(false); // old discipline fading away
   const [menu, setMenu] = useState(false); // collapsed into a hamburger below 1100px
@@ -134,6 +142,18 @@ export default function WorksView({ groups, lists }: { groups: Group[]; lists: R
                 </div>
               </section>
             ))}
+
+            {/* the drive folder, parked at the far end of the scroller */}
+            {more && (
+              <section className="w-outro">
+                <a href={more} target="_blank" rel="noreferrer">
+                  <span>View more</span>
+                  <span>
+                    projects <span className="w-outro-arrow">↗</span>
+                  </span>
+                </a>
+              </section>
+            )}
           </div>
         </HorizontalScroll>
       ) : (
