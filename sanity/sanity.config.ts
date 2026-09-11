@@ -67,11 +67,27 @@ export default defineConfig({
                           // on the works page) with no code change.
                           value === '3d'
                             ? async () => {
-                                const folders = await context
+                                const docs = await context
                                   .getClient({apiVersion: API_VERSION})
-                                  .fetch<{_id: string; title: string}[]>(
-                                    '*[_type == "renderFolder"]|order(order asc){_id, title}',
+                                  .fetch<{_id: string; title: string; order?: number}[]>(
+                                    '*[_type == "renderFolder"]{_id, title, order}',
                                   )
+                                // A folder with unpublished edits comes back
+                                // twice - as itself and as its draft - and the
+                                // draft's id matches no project's category
+                                // reference, so it opened an empty folder.
+                                // Collapse onto the published id, keeping the
+                                // draft's title and order so a rename shows
+                                // here before it is published.
+                                const folders = [
+                                  ...docs
+                                    .reduce((map, doc) => {
+                                      const _id = doc._id.replace(/^drafts\./, '')
+                                      if (doc._id !== _id || !map.has(_id)) map.set(_id, {...doc, _id})
+                                      return map
+                                    }, new Map<string, {_id: string; title: string; order?: number}>())
+                                    .values(),
+                                ].sort((x, y) => (x.order ?? 0) - (y.order ?? 0))
                                 return S.list()
                                   .title(title)
                                   .items([
