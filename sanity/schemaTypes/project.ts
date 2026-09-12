@@ -78,6 +78,36 @@ export const project = defineType({
       ],
     }),
     defineField({
+      name: 'gallery',
+      title: 'Album',
+      type: 'array',
+      group: 'card',
+      description:
+        'Drop in as many images as you like in one go - they all upload, and dragging a thumbnail reorders them. They appear in the gallery straight after the cover.',
+      hidden: ({parent}) => parent?.discipline !== '3d',
+      of: [
+        defineArrayMember({
+          type: 'image',
+          options: {hotspot: true},
+          fields: [
+            // optional on purpose - a twenty image drop should not be twenty
+            // forms. Blank falls back to the cover's alt, then the title.
+            defineField({name: 'alt', title: 'Alt text', type: 'string'}),
+          ],
+        }),
+      ],
+    }),
+    defineField({
+      name: 'tools',
+      title: 'Software used',
+      type: 'array',
+      group: 'card',
+      of: [{type: 'string'}],
+      options: {layout: 'tags'},
+      description:
+        'Blender, V-Ray, Photoshop... These show as pills along the bottom of the image when someone hovers it. Type a name and press enter.',
+    }),
+    defineField({
       name: 'description',
       title: 'Short description',
       type: 'text',
@@ -163,34 +193,6 @@ export const project = defineType({
       type: 'string',
       group: 'study',
       description: 'e.g. "3 weeks".',
-    }),
-    defineField({
-      name: 'tools',
-      title: 'Tools used',
-      type: 'array',
-      group: 'study',
-      of: [{type: 'string'}],
-      options: {layout: 'tags'},
-    }),
-    defineField({
-      name: 'gallery',
-      title: 'Gallery images',
-      type: 'array',
-      group: 'study',
-      of: [
-        defineArrayMember({
-          type: 'image',
-          options: {hotspot: true},
-          fields: [
-            defineField({
-              name: 'alt',
-              title: 'Alt text',
-              type: 'string',
-              validation: (rule) => rule.required(),
-            }),
-          ],
-        }),
-      ],
     }),
     defineField({
       name: 'videoUrl',

@@ -1,14 +1,20 @@
 # Sanity studio — schemas
 
-A copy of the live studio at `~/Downloads/studio-amarbalajiportfolio`
-(project `iow9ex5z`, dataset `production`), kept here so the field
-definitions live alongside the site that reads them.
+The studio itself (project `iow9ex5z`, dataset `production`), living
+alongside the site that reads it.
 
-**This copy is a reference, not the deployed studio.** Editing a schema here
-changes nothing until the same edit is made in the studio folder and pushed:
+**This is the deployed studio.** The separate
+`~/Downloads/studio-amarbalajiportfolio` copy the README used to point at is
+gone; `sanity.cli.ts` here carries the `studioHost` and `appId`, so a schema
+edit goes live from this folder:
 
-    cd ~/Downloads/studio-amarbalajiportfolio
+    cd sanity
+    npx sanity dev          # localhost:3333, to try a change first
     npx sanity deploy       # needs `npx sanity login` first
+
+Until it is deployed, a new field exists only where the code runs - the
+hosted studio at amarbalajiportfolio.sanity.studio keeps showing the old form
+even though both read the same data.
 
 ## What the site reads
 
@@ -19,7 +25,8 @@ changes nothing until the same edit is made in the studio folder and pushed:
 | `experienceEntry` | kind, title, subtitle, period, location, detail, order | `/about` experience & education |
 | `contact` | email, phone, availability, socials | `/contact` |
 | `siteSettings` | seoTitle, seoDescription, resume | page metadata + the Resume button |
-| `project` | title, discipline, category, image(+alt), liveUrl, behanceId, order | `/works` and the home tunnel |
+| `project` | title, discipline, category, image(+alt), gallery, tools, liveUrl, behanceId, pdf, order | `/works` and the home tunnel |
+| `renderFolder` | title, slug, order | the `/works` gallery sections |
 
 Every field defined here is rendered somewhere. If a field stops being used,
 delete it from both copies rather than leaving a dead input in the studio.

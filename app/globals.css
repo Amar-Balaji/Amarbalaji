@@ -461,15 +461,53 @@ a { color: inherit; text-decoration: none; }
 
 .w-gallery { display: flex; height: 100vh; height: 100dvh; }
 /* height-driven: the width follows each image's own aspect-ratio, so nothing
-   is ever cropped */
-.w-gallery img {
+   is ever cropped. SLOT_VH in works/page.tsx quotes this height to the browser
+   when it picks a file from the srcset - change one, change the other. */
+.w-shot {
+  position: relative;
   height: 82vh;
   width: auto;
   max-width: none;
   align-self: center;
-  object-fit: contain;
   flex-shrink: 0;
+  margin: 0;
+  overflow: hidden;
   background: #111;
+}
+.w-gallery img { display: block; width: 100%; height: 100%; object-fit: contain; }
+
+/* the software list, along the bottom of the render */
+.w-shot figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 3.5rem 1.25rem 1.25rem;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.78));
+}
+.w-shot figcaption span {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+/* hidden only where there is a pointer to reveal them with - a touch screen
+   has no hover, so there the pills simply stay put.
+   .is-hot, not :hover - HorizontalScroll.tsx hit-tests the cursor itself,
+   because :hover goes stale when the gallery scrolls under a still mouse */
+@media (hover: hover) {
+  .w-shot figcaption {
+    opacity: 0;
+    transform: translateY(0.5rem);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .w-shot.is-hot figcaption { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .w-shot figcaption { transition: none; transform: none; }
 }
 
 /* closing panel of the 3d gallery: the drive folder with the rest of the work */
@@ -508,20 +546,20 @@ a { color: inherit; text-decoration: none; }
   from { opacity: 1; transform: none; }
   to   { opacity: 0; transform: translateY(2.25rem); }
 }
-.works-body :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty) {
+.works-body :is(.w-intro, .w-tab, .w-shot, .w-outro, .works-title, .project-item, .empty) {
   animation: item-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(0.12s + var(--n, 0) * 0.09s);
 }
 /* only the first handful are ever on screen, so the exit stagger caps early -
    FADE in WorksView.tsx has to outlast this */
-.works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty) {
+.works-body[data-out="true"] :is(.w-intro, .w-tab, .w-shot, .w-outro, .works-title, .project-item, .empty) {
   animation: item-out 0.4s cubic-bezier(0.4, 0, 1, 1) both;
   animation-delay: calc(min(var(--n, 0), 6) * 0.05s);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .works-body :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty),
-  .works-body[data-out="true"] :is(.w-intro, .w-tab, .w-gallery img, .w-outro, .works-title, .project-item, .empty) {
+  .works-body :is(.w-intro, .w-tab, .w-shot, .w-outro, .works-title, .project-item, .empty),
+  .works-body[data-out="true"] :is(.w-intro, .w-tab, .w-shot, .w-outro, .works-title, .project-item, .empty) {
     animation: none;
   }
 }
@@ -542,7 +580,7 @@ a { color: inherit; text-decoration: none; }
     padding: 0 22px;
   }
   .w-tab-label { writing-mode: horizontal-tb; transform: none; }
-  .w-gallery img { width: 100%; height: auto; }
+  .w-shot { width: 100%; height: auto; }
   .w-outro {
     padding: 4.5rem 22px;
     border-left: 0;
@@ -711,40 +749,41 @@ button.project-item {
 }
 
 /* pdf lightbox - the browser renders the document, we only frame it */
-.pdf-lightbox {
+/* shared by the BIM drawing sets and the full-size renders */
+.lightbox {
   position: fixed;
   inset: 0;
   z-index: 60;
   display: flex;
   flex-direction: column;
   background: rgba(8, 8, 8, 0.94);
-  animation: pdf-in 0.3s ease;
+  animation: lightbox-in 0.3s ease;
 }
-@keyframes pdf-in { from { opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .pdf-lightbox { animation: none; } }
+@keyframes lightbox-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .lightbox { animation: none; } }
 
-.pdf-bar {
+.lightbox-bar {
   display: flex;
   align-items: center;
   gap: 1.25rem;
   padding: 1rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
-.pdf-bar strong {
+.lightbox-bar strong {
   flex-grow: 1;
   font-size: 0.9375rem;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.pdf-bar a {
+.lightbox-bar a {
   font-size: 0.75rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
   text-decoration: none;
 }
-.pdf-bar a:hover { color: #ff3b1f; }
-.pdf-bar button {
+.lightbox-bar a:hover { color: #ff3b1f; }
+.lightbox-bar button {
   background: none;
   border: 0;
   color: #fff;
@@ -753,19 +792,67 @@ button.project-item {
   cursor: pointer;
   padding: 0.25rem 0.5rem;
 }
-.pdf-bar button:hover { color: #ff3b1f; }
+.lightbox-bar button:hover { color: #ff3b1f; }
 
-.pdf-lightbox iframe {
+.lightbox iframe {
   flex-grow: 1;
   width: 100%;
   border: 0;
   background: #1a1a1a;
 }
 
+/* the render at its native resolution, fitted to whatever room is left under
+   the bar. min-height:0 or the flex item refuses to shrink and overflows. */
+.lightbox-img {
+  flex-grow: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.lightbox-img img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* zoomed. The pane stays a plain scroll container, so its scrollbars and touch
+   pinch pan for free.
+   The centring MUST be handed over to margin:auto here. Left as
+   justify-content/align-items, an overflowing picture is centred, which puts
+   its left and top outside the scroll origin - and scrollLeft cannot go
+   negative, so that half is simply unreachable. margin:auto centres it only
+   while it still fits and collapses to 0 once it overflows, which keeps every
+   edge scrollable. */
+.lightbox-img[data-zoom="true"] {
+  overflow: auto;
+  padding: 0;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.lightbox-img[data-zoom="true"] img {
+  margin: auto;
+}
+
+/* the gallery image itself is the button that opens it */
+.w-shot > button {
+  display: block;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.w-shot > button:focus-visible { outline: 2px solid #ff3b1f; outline-offset: -2px; }
+
 @media (max-width: 700px) {
-  .pdf-bar { padding: 0.875rem 1rem; gap: 0.875rem; }
-  .pdf-bar strong { font-size: 0.75rem; }
-  .pdf-bar a { display: none; }
+  .lightbox-bar { padding: 0.875rem 1rem; gap: 0.875rem; }
+  .lightbox-bar strong { font-size: 0.75rem; }
+  .lightbox-bar a { display: none; }
 }
 
 /* cursor-following image preview */

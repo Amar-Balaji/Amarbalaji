@@ -15,6 +15,8 @@ type Doc = {
   discipline?: string;
   ref?: string;
   alt?: string;
+  album?: { ref?: string; alt?: string }[];
+  tools?: string[];
   liveUrl?: string;
   behanceId?: string;
   pdf?: string;
@@ -26,7 +28,8 @@ type Folder = { key?: string; label?: string };
 // is set in the Studio, so adding a section there adds it here.
 const QUERY =
   `{"docs": *[_type=="project"]|order(order asc)` +
-  `{title, ${CATEGORY_KEY}, discipline, liveUrl, behanceId, "pdf": pdf.asset._ref, "ref": image.asset._ref, "alt": image.alt},` +
+  `{title, ${CATEGORY_KEY}, discipline, liveUrl, behanceId, "pdf": pdf.asset._ref, "ref": image.asset._ref, "alt": image.alt,` +
+  ` "album": gallery[]{"ref": asset._ref, alt}, tools},` +
   `"folders": *[_type=="renderFolder"]|order(order asc){"key": slug.current, "label": title},` +
   `"more": *[_type=="siteSettings"][0].moreRendersUrl}`;
 
@@ -39,9 +42,12 @@ const SECTIONS: Folder[] = [
   { key: "workspace", label: "Workspace" },
   { key: "other", label: "Other" },
 ];
-// the gallery slot is height-driven on desktop, full width below 900px - the
-// browser picks from these by slot width x device pixel ratio
-const WIDTHS = [700, 1000, 1400];
+// the browser picks from these by slot width x device pixel ratio. 2000 is
+// there for big monitors: 82vh on a 1440p screen is already a ~2100px slot.
+const WIDTHS = [700, 1000, 1400, 2000];
+// the gallery slot is height-driven (see .w-gallery in globals.css) - keep in
+// step with the height there, or `sizes` starts lying again
+const SLOT_VH = 82;
 
 // the three list disciplines, in the order of the left-hand nav after "3d"
 const LISTS: { discipline: string; subtitle: string }[] = [
@@ -89,6 +95,14 @@ async function behanceMeta(id: string): Promise<{ title?: string; img?: string }
   }
 }
 
+/** A project is an album: the cover first, then every image dropped into it.
+ *  A project with no cover is still an album, so this drives off the list, not
+ *  the cover. */
+const shots = (d: Doc): { ref: string; alt?: string }[] =>
+  [{ref: d.ref, alt: d.alt}, ...(d.album ?? [])].filter(
+    (s): s is {ref: string; alt?: string} => !!s.ref
+  );
+
 export default async function Works() {
   const { docs, folders, more } = await sanityFetch<{
     docs: Doc[];
@@ -102,15 +116,32 @@ export default async function Works() {
       key,
       label,
       images: docs
-        .filter((d) => d.category === key && d.ref)
-        .map((d) => ({
-          src: imageUrl(d.ref!, 1400),
-          srcSet: WIDTHS.map((w) => `${imageUrl(d.ref!, w)} ${w}w`).join(", "),
-          alt: d.alt ?? d.title ?? "",
-          // image-<id>-<w>x<h>-<ext>: the shape is in the ref, so the gallery
-          // can size the box before the file downloads
-          ratio: d.ref!.split("-")[2].replace("x", " / "),
-        })),
+        .filter((d) => d.category === key)
+        .flatMap((d) =>
+          shots(d).map((s) => {
+            // image-<id>-<w>x<h>-<ext>: the shape is in the ref, so the gallery
+            // can size the box before the file downloads
+            const [w, h] = s.ref.split("-")[2].split("x").map(Number);
+            return {
+              src: imageUrl(s.ref, 1400),
+              srcSet: WIDTHS.map((n) => `${imageUrl(s.ref, n)} ${n}w`).join(", "),
+              // an album image left blank borrows the cover's words, then the title
+              alt: s.alt ?? d.alt ?? d.title ?? "",
+              ratio: `${w} / ${h}`,
+              // the slot is as tall as SLOT_VH and as wide as the shape makes
+              // it, so that is the only honest width to quote. A flat vw here
+              // understates a landscape render by half and the browser picks a
+              // file it then has to upscale - which is what looked blurry.
+              sizes: `(max-width: 900px) 100vw, calc(${SLOT_VH}vh * ${(w / h).toFixed(3)})`,
+              // the lightbox asks for the render at its own native width, so
+              // this is the full thing - auto=format still hands over webp
+              // rather than the original multi-megabyte file
+              full: imageUrl(s.ref, w),
+              title: d.title ?? "",
+              tools: d.tools ?? [],
+            };
+          })
+        ),
     }))
     .filter((g) => g.images.length > 0);
 

@@ -91,13 +91,13 @@ export default function ProjectList({ rows }: { rows: Row[] }) {
 
       {open?.pdf && (
         <div
-          className="pdf-lightbox"
+          className="lightbox"
           role="dialog"
           aria-modal="true"
           aria-label={`${open.title} — drawing set`}
           onClick={() => setOpen(null)}
         >
-          <div className="pdf-bar">
+          <div className="lightbox-bar">
             <strong>{open.title}</strong>
             <a href={open.pdf} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()}>
               Open in new tab
