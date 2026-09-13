@@ -103,13 +103,8 @@ export default defineConfig({
                                               '_type == "project" && discipline == "3d" && category._ref == $folder',
                                             )
                                             .params({folder: folder._id})
-                                            // Renders sort by image filename on
-                                            // the site; the asset name is not
-                                            // orderable here, so the title —
-                                            // which is named to match — stands
-                                            // in for it.
                                             .defaultOrdering([
-                                              {field: 'title', direction: 'asc'},
+                                              {field: 'order', direction: 'asc'},
                                             ])
                                             .initialValueTemplates([
                                               S.initialValueTemplateItem('project-by-gallery', {

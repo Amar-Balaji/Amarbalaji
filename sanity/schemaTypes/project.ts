@@ -166,17 +166,10 @@ export const project = defineType({
       title: 'Sort order',
       type: 'number',
       group: 'card',
-      description: 'Low numbers first, within the gallery.',
-      // 3D renders sort by image filename instead, so the upload order is the
-      // gallery order and there is no number to keep in sync.
-      hidden: ({parent}) => parent?.discipline === '3d',
-      validation: (rule) =>
-        rule.custom((value, context) =>
-          (context.document as {discipline?: string} | undefined)?.discipline === '3d' ||
-          typeof value === 'number'
-            ? true
-            : 'Required',
-        ),
+      description:
+        'Low numbers first. In 3D folders (Selected, Workspace, …) this is the image order on the works page and in the homepage tunnel.',
+      initialValue: 100,
+      validation: (rule) => rule.required(),
     }),
 
     /* ---------------------------------------------------------- case study */
